@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Smartest Bug Hunter Pro</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-row">
+          <div class="logo">SB</div>
+          <div>
+            <h2>Bug Hunter</h2>
+          </div>
+        </div>
+
+        <nav>
+          <a href="/dashboard" class="nav-active">Dashboard</a>
+          {% if user.is_admin %}
+          <a href="/admin">Admin Panel</a>
+          {% endif %}
+          <a href="/logout">Logout</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Overview</p>
+            <h1>Welcome, {{ user.username }}</h1>
+          </div>
+          <div class="scanner-box">
+            <input id="targetInput" type="url" placeholder="https://example.com" />
+            <button id="scanButton" class="primary-btn">Scan</button>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <div class="stat-card">
+            <span>Scans</span>
+            <strong>{{ total_scans }}</strong>
+          </div>
+          <div class="stat-card">
+            <span>Findings</span>
+            <strong>{{ total_findings }}</strong>
+          </div>
+          <div class="stat-card">
+            <span>Critical</span>
+            <strong>{{ critical_total }}</strong>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel">
+            <h3>OWASP Top 10</h3>
+            {% if owasp_breakdown %}
+            <ul class="breakdown-list">
+              {% for category, count in owasp_breakdown %}
+              <li>
+                <span>{{ category }}</span>
+                <strong>{{ count }}</strong>
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p class="muted">No findings yet.</p>
+            {% endif %}
+          </div>
+
+          <div class="panel">
+            <h3>Recent scans</h3>
+            {% if scans %}
+            <ul class="scan-list">
+              {% for scan in scans[:5] %}
+              <li>
+                <a href="/scan/{{ scan.id }}">{{ scan.target_url }}</a>
+                <div class="scan-meta">
+                  <span>{{ scan.highest_severity }}</span>
+                  <span>{{ scan.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p class="muted">No scans generated yet.</p>
+            {% endif %}
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const scanButton = document.getElementById('scanButton');
+      const targetInput = document.getElementById('targetInput');
+
+      async function runScan() {
+        const target = targetInput.value.trim();
+        if (!target) {
+          alert('Please provide a target URL.');
+          return;
+        }
+
+        scanButton.disabled = true;
+        scanButton.textContent = 'Scanning...';
+
+        try {
+          const response = await fetch('/api/scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_url: target })
+          });
+
+          const data = await response.json();
+          if (data && data.scan_id) {
+            window.location.href = `/scan/${data.scan_id}`;
+          } else {
+            alert('Scan failed.');
+          }
+        } catch (error) {
+          alert('The scan request failed. Please try again.');
+        } finally {
+          scanButton.disabled = false;
+          scanButton.textContent = 'Scan';
+        }
+      }
+
+      scanButton.addEventListener('click', runScan);
+      targetInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          runScan();
+        }
+      });
+    </script>
+  </body>
+</html>

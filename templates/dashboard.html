@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | Smartest Bug Hunter Pro</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div class="brand-row">
+          <div class="logo">SB</div>
+          <div>
+            <h1>Create account</h1>
+            <p>Start tracking findings</p>
+          </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/register">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" required />
+
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required />
+
+          <button type="submit" class="primary-btn">Register</button>
+        </form>
+
+        <div class="auth-link-row">
+          <span>Already have an account?</span>
+          <a href="/login">Login here</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

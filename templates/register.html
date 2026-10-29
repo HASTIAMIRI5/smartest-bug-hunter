@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smartest Bug Hunter Pro</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div class="brand-row">
+          <div class="logo">SB</div>
+          <div>
+            <h1>Smartest Bug Hunter</h1>
+            <p>OWASP security companion</p>
+          </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/login">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" required />
+
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required />
+
+          <button type="submit" class="primary-btn">Login</button>
+        </form>
+
+        <div class="auth-link-row">
+          <span>Need an account?</span>
+          <a href="/register">Create one</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

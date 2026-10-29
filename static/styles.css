@@ -3,76 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smartest Bug Hunter</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <title>Admin Panel | Smartest Bug Hunter Pro</title>
+    <link rel="stylesheet" href="/static/styles.css" />
   </head>
-  <body data-theme="dark">
-    <div class="app-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">OWASP Top 10 Security Detector</p>
-          <h1>Smartest Bug Hunter</h1>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-row">
+          <div class="logo">SB</div>
+          <div>
+            <h2>Bug Hunter</h2>
+          </div>
         </div>
-        <div class="header-actions">
-          <button id="themeToggle" class="secondary-btn" type="button">Toggle theme</button>
-        </div>
-      </header>
 
-      <main class="dashboard">
-        <section class="panel scan-panel">
-          <h2>Scan a target</h2>
-          <div class="scan-row">
-            <input id="targetInput" type="text" placeholder="https://example.com" value="https://example.com" />
-            <button id="scanButton" type="button">Run Scan</button>
-          </div>
-          <div class="scan-row compact">
-            <input id="usernameInput" type="text" placeholder="Optional username" />
-            <input id="passwordInput" type="password" placeholder="Optional password" />
-          </div>
-          <div class="toolbar-row">
-            <button id="authButton" class="secondary-btn" type="button">Run Auth Simulation</button>
-            <label class="export-box">
-              <span>Export</span>
-              <select id="exportFormat">
-                <option value="json">JSON</option>
-                <option value="csv">CSV</option>
-              </select>
-            </label>
-            <button id="exportButton" class="secondary-btn" type="button">Export history</button>
-          </div>
-          <p class="helper-text">Use only targets you own or have explicit authorization to test.</p>
-        </section>
+        <nav>
+          <a href="/dashboard">Dashboard</a>
+          <a href="/admin" class="nav-active">Admin Panel</a>
+          <a href="/logout">Logout</a>
+        </nav>
+      </aside>
 
-        <section class="panel summary-panel">
-          <h2>Overall risk</h2>
-          <div class="score-wrap">
-            <div id="riskScore" class="score">--</div>
-            <div>
-              <p id="riskLabel" class="risk-label">Waiting for scan</p>
-              <p id="summaryText" class="summary-text">No report yet.</p>
-            </div>
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Admin</p>
+            <h1>System overview</h1>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <div class="stat-card">
+            <span>Users</span>
+            <strong>{{ total_users }}</strong>
+          </div>
+          <div class="stat-card">
+            <span>Scans</span>
+            <strong>{{ total_scan_count }}</strong>
           </div>
         </section>
 
-        <section class="panel findings-panel">
-          <div class="section-header">
-            <h2>Findings</h2>
-            <div id="categoryChips" class="chips"></div>
+        <section class="content-grid">
+          <div class="panel">
+            <h3>Users</h3>
+            <ul class="admin-list">
+              {% for user in all_users %}
+              <li>
+                <span>{{ user.username }}</span>
+                <span>{{ user.email }}</span>
+                <span>{% if user.is_admin %}Admin{% else %}User{% endif %}</span>
+              </li>
+              {% endfor %}
+            </ul>
           </div>
-          <div id="findingsList" class="findings-list">
-            <div class="empty-state">Start a scan to view findings.</div>
-          </div>
-        </section>
 
-        <section class="panel history-panel">
-          <div class="section-header">
-            <h2>Scan history</h2>
+          <div class="panel">
+            <h3>Activity</h3>
+            <ul class="admin-list">
+              {% for scan in all_scans[:10] %}
+              <li>
+                <span>{{ scan.target_url }}</span>
+                <span>{{ scan.highest_severity }}</span>
+                <span>{{ scan.created_at.strftime('%Y-%m-%d') }}</span>
+              </li>
+              {% endfor %}
+            </ul>
           </div>
-          <div id="historyList" class="history-list"></div>
         </section>
       </main>
     </div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
   </body>
 </html>

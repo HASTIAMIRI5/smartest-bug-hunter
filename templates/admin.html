@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan details | Smartest Bug Hunter Pro</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-row">
+          <div class="logo">SB</div>
+          <div>
+            <h2>Bug Hunter</h2>
+          </div>
+        </div>
+
+        <nav>
+          <a href="/dashboard">Dashboard</a>
+          {% if user.is_admin %}
+          <a href="/admin">Admin Panel</a>
+          {% endif %}
+          <a href="/logout">Logout</a>
+        </nav>
+      </aside>
+
+      <main class="content detail-content">
+        <header class="topbar detail-topbar">
+          <div>
+            <p class="eyebrow">Scan report</p>
+            <h1>{{ scan.target_url }}</h1>
+          </div>
+          <div class="detail-actions">
+            <a class="secondary-btn" href="/dashboard">Back</a>
+            <a class="primary-btn" href="/scan/{{ scan.id }}/pdf">Export PDF</a>
+          </div>
+        </header>
+
+        <section class="stats-grid compact-grid">
+          <div class="stat-card">
+            <span>Highest severity</span>
+            <strong>{{ scan.highest_severity }}</strong>
+          </div>
+          <div class="stat-card">
+            <span>Findings</span>
+            <strong>{{ scan.total_findings }}</strong>
+          </div>
+          <div class="stat-card">
+            <span>Scanned</span>
+            <strong>{{ scan.created_at.strftime('%Y-%m-%d') }}</strong>
+          </div>
+        </section>
+
+        <section class="panel findings-panel">
+          <h3>Vulnerabilities</h3>
+          {% if findings %}
+          {% for finding in findings %}
+          <article class="finding-card severity-{{ finding.severity }}">
+            <div class="finding-header">
+              <h4>{{ finding.title }}</h4>
+              <span class="severity-pill severity-{{ finding.severity }}">{{ finding.severity }}</span>
+            </div>
+            <div class="finding-detail">Category: {{ finding.category }}</div>
+            <p>{{ finding.description }}</p>
+            <p><strong>Remediation:</strong> {{ finding.remediation }}</p>
+            {% if finding.evidence %}
+            <p><strong>Evidence:</strong> {{ finding.evidence }}</p>
+            {% endif %}
+          </article>
+          {% endfor %}
+          {% else %}
+          <p class="muted">No findings were detected for this scan.</p>
+          {% endif %}
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

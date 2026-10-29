@@ -1,0 +1,199 @@
+from __future__ import annotations
+
+import re
+from urllib.parse import urlparse
+
+import requests
+
+SECURITY_HEADERS = [
+    "content-security-policy",
+    "x-frame-options",
+    "x-content-type-options",
+    "referrer-policy",
+    "permissions-policy",
+    "strict-transport-security",
+]
+
+
+def make_finding(category: str, severity: str, title: str, description: str, remediation: str, evidence: str = ""):
+    return {
+        "category": category,
+        "severity": severity,
+        "title": title,
+        "description": description,
+        "remediation": remediation,
+        "evidence": evidence,
+    }
+
+
+def detect_target(target_url: str):
+    findings = []
+    base_domain = urlparse(target_url).netloc.lower()
+
+    try:
+        response = requests.get(target_url, timeout=15, allow_redirects=True)
+        page_text = response.text.lower()
+        headers = {k.lower(): v for k, v in response.headers.items()}
+        status_code = response.status_code
+
+        if not response.ok:
+            findings.append(
+                make_finding(
+                    "Reconnaissance",
+                    "info",
+                    "HTTP status indicates a non-success response",
+                    f"The target responded with HTTP {status_code}, which may indicate an application or infrastructure issue.",
+                    "Review server-level errors, application health, and expected authentication flows before continuing exhaustive testing.",
+                    f"Status code: {status_code}",
+                )
+            )
+
+        missing_headers = [header for header in SECURITY_HEADERS if header not in headers]
+        if missing_headers:
+            findings.append(
+                make_finding(
+                    "Headers",
+                    "medium",
+                    "Missing HTTP security headers",
+                    "The response is missing critical security headers that reduce common exploitation vectors.",
+                    "Add CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and HSTS headers to all relevant responses.",
+                    ", ".join(missing_headers),
+                )
+            )
+
+        if "set-cookie" in headers:
+            cookie_value = headers.get("set-cookie", "")
+            if "secure" not in cookie_value.lower() or "httponly" not in cookie_value.lower():
+                findings.append(
+                    make_finding(
+                        "Cookies",
+                        "medium",
+                        "Cookie protections are incomplete",
+                        "Application cookies are not fully hardened against theft or client-side tampering.",
+                        "Set the Secure, HttpOnly, and SameSite attributes on all session-related cookies.",
+                        cookie_value,
+                    )
+                )
+
+        xss_markers = ["<script", "javascript:", "onerror=", "onmouseover=", "eval(", "innerhtml"]
+        if any(marker in page_text for marker in xss_markers):
+            findings.append(
+                make_finding(
+                    "XSS",
+                    "high",
+                    "Potential cross-site scripting vectors",
+                    "The page includes common client-side injection markers that may allow XSS payload execution.",
+                    "Encode output properly, avoid unsafe HTML insertion, and enforce a strict Content-Security-Policy.",
+                    "Inline script or event-handler pattern detected in page output.",
+                )
+            )
+
+        sqli_markers = ["union select", "or 1=1", "sleep(", "drop table", ";--", "admin' --"]
+        if any(marker in page_text for marker in sqli_markers):
+            findings.append(
+                make_finding(
+                    "Injection",
+                    "critical",
+                    "Potential SQL injection indicators",
+                    "The application output contains query patterns that suggest unsafe SQL construction or error exposure.",
+                    "Use parameterized queries, ORM tools, and input validation to stop database injection vectors.",
+                    "Unsafe SQL-related patterns detected in application output.",
+                )
+            )
+
+        forms = re.findall(r"<form[^>]*>", response.text, flags=re.IGNORECASE)
+        if forms:
+            if not any("csrf" in token.lower() for token in response.text.lower().split()):
+                findings.append(
+                    make_finding(
+                        "CSRF",
+                        "medium",
+                        "Possible missing CSRF protection",
+                        "HTML forms were found without obvious CSRF protection metadata.",
+                        "Include a unique CSRF token on every state-changing request and validate it server-side.",
+                        f"Detected {len(forms)} forms without a direct CSRF token marker.",
+                    )
+                )
+
+        if response.history or response.url != target_url:
+            findings.append(
+                make_finding(
+                    "Redirect",
+                    "medium",
+                    "Redirect chaining or open redirect conditions",
+                    "The target redirects during the request, which may create trust or phishing issues.",
+                    "Limit redirects to trusted domains and validate redirect targets against an allowlist.",
+                    f"Final URL: {response.url}",
+                )
+            )
+
+        if re.search(r"(?:redirect|next|return|url)\s*[:=]\s*[\"']?https?://", page_text):
+            findings.append(
+                make_finding(
+                    "Open Redirect",
+                    "medium",
+                    "User-controlled redirect parameter detected",
+                    "The application appears to accept a URL parameter that could be used for open-redirect exploitation.",
+                    "Validate redirect destinations, require internal-relative paths, and reject untrusted external URLs.",
+                    "Redirect parameter pattern detected.",
+                )
+            )
+
+        if "server" in headers:
+            server_value = headers.get("server", "")
+            if server_value:
+                findings.append(
+                    make_finding(
+                        "Reconnaissance",
+                        "low",
+                        "Technology fingerprinting is exposed",
+                        "The application reveals server details, which helps attackers learn the environment and attack surface.",
+                        "Reduce header disclosure and ensure the server does not expose unnecessary implementation details.",
+                        f"Server header: {server_value}",
+                    )
+                )
+
+    except requests.RequestException as exc:
+        return {
+            "status": "error",
+            "target": target_url,
+            "summary": {
+                "total_findings": 1,
+                "highest_severity": "info",
+                "domain": base_domain,
+            },
+            "findings": [
+                make_finding(
+                    "Connectivity",
+                    "info",
+                    "Target is unreachable",
+                    "The scanner was unable to establish a successful connection to the target.",
+                    "Verify the target URL, connectivity, DNS, and any network restrictions before scanning again.",
+                    str(exc),
+                )
+            ],
+        }
+
+    deduped = []
+    seen = set()
+    for finding in findings:
+        key = (finding["category"], finding["title"])
+        if key not in seen:
+            seen.add(key)
+            deduped.append(finding)
+
+    severity_rank = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}
+    highest_severity = "info"
+    if deduped:
+        highest_severity = max(deduped, key=lambda item: severity_rank.get(item["severity"], 0))["severity"]
+
+    return {
+        "status": "ok",
+        "target": target_url,
+        "summary": {
+            "total_findings": len(deduped),
+            "highest_severity": highest_severity,
+            "domain": base_domain,
+        },
+        "findings": deduped,
+    }
