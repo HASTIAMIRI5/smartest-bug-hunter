@@ -1,8 +1,224 @@
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-.git/
-.gitignore
-.DS_Store
-scan_history.db
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #08141f 0%, #0a1d2b 40%, #091a24 100%);
+  color: #edf6ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2dd4bf, #60a5fa);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #041018;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.pill {
+  background: rgba(45, 212, 191, 0.12);
+  color: #8ef0dc;
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+.panel {
+  background: rgba(11, 25, 36, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(2, 8, 23, 0.35);
+}
+
+.form-panel {
+  padding: 24px;
+  margin-bottom: 26px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+}
+
+input[type="url"] {
+  width: 100%;
+  padding: 16px 18px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #edf6ff;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #22c55e 0%, #14b8a6 100%);
+  padding: 16px 22px;
+  color: #03151b;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.08);
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.metric {
+  padding: 20px;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #8aa6be;
+  margin-bottom: 10px;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.findings-panel {
+  padding: 20px;
+}
+
+.findings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.findings-header h2 {
+  margin: 0;
+}
+
+.findings-list {
+  display: grid;
+  gap: 14px;
+}
+
+.finding-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-left: 5px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.finding-card.critical {
+  border-left-color: #ef4444;
+}
+
+.finding-card.high {
+  border-left-color: #f97316;
+}
+
+.finding-card.medium {
+  border-left-color: #fbbf24;
+}
+
+.finding-card.low {
+  border-left-color: #60a5fa;
+}
+
+.finding-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge.critical { background: rgba(239, 68, 68, 0.14); color: #fca5a5; }
+.badge.high { background: rgba(249, 115, 22, 0.14); color: #fdba74; }
+.badge.medium { background: rgba(251, 191, 36, 0.14); color: #fcd34d; }
+.badge.low { background: rgba(96, 165, 250, 0.14); color: #93c5fd; }
+.badge.info { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; }
+
+.finding-card h3 {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.finding-card p {
+  margin: 8px 0 0;
+  color: #dfeaf7;
+  line-height: 1.5;
+}
+
+.finding-meta {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: #9bb4c8;
+}
+
+.empty-state {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  color: #afc5d7;
+}
+
+@media (max-width: 760px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
