@@ -1,58 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smartest Bug Hunter</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">OWASP Security Detector</p>
-          <h1>Smartest Bug Hunter</h1>
-        </div>
-      </header>
-
-      <main class="dashboard">
-        <section class="panel scan-panel">
-          <h2>Scan a target</h2>
-          <div class="scan-row">
-            <input
-              id="targetInput"
-              type="text"
-              placeholder="https://example.com"
-              value="https://example.com"
-            />
-            <button id="scanButton">Run Scan</button>
-          </div>
-          <p class="helper-text">Use a test target or a local application you own and are authorized to assess.</p>
-        </section>
-
-        <section class="panel summary-panel">
-          <h2>Overall risk</h2>
-          <div class="score-wrap">
-            <div id="riskScore" class="score">--</div>
-            <div>
-              <p id="riskLabel" class="risk-label">Waiting for scan</p>
-              <p id="summaryText" class="summary-text">No report yet.</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel findings-panel">
-          <div class="section-header">
-            <h2>Findings</h2>
-            <div id="categoryChips" class="chips"></div>
-          </div>
-          <div id="findingsList" class="findings-list">
-            <div class="empty-state">Start a scan to view findings.</div>
-          </div>
-        </section>
-      </main>
-    </div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-  </body>
-</html>
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.git/
+.gitignore
+.DS_Store
+scan_history.db

@@ -1,0 +1,9 @@
+# Local docker compose configuration
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+    restart: unless-stopped
